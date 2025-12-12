@@ -1,10 +1,18 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, ChevronDown } from 'lucide-react';
+import { Menu, X, ChevronDown, User, LogOut } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isFeaturesOpen, setIsFeaturesOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    setIsUserMenuOpen(false);
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
@@ -54,10 +62,36 @@ export default function Header() {
           </div>
 
           <div className="hidden lg:flex items-center space-x-4">
-            <Link to="/login" className="text-gray-700 hover:text-gray-900 font-medium">Login</Link>
-            <Link to="/signup" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors">
-              Sign Up
-            </Link>
+            {user ? (
+              <div className="relative">
+                <button
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 font-medium"
+                >
+                  <User className="w-5 h-5" />
+                  <span>{user.user_metadata?.name || user.email}</span>
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+                {isUserMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2">
+                    <button
+                      onClick={handleSignOut}
+                      className="w-full flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Logout</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
+                <Link to="/login" className="text-gray-700 hover:text-gray-900 font-medium">Login</Link>
+                <Link to="/signup" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors">
+                  Sign Up
+                </Link>
+              </>
+            )}
           </div>
 
           <button
@@ -79,10 +113,26 @@ export default function Header() {
             <Link to="/blog" className="block py-2 text-gray-700 hover:text-gray-900">Blog</Link>
             <Link to="/faq" className="block py-2 text-gray-700 hover:text-gray-900">FAQ</Link>
             <div className="pt-4 space-y-2">
-              <Link to="/login" className="block py-2 text-gray-700 hover:text-gray-900">Login</Link>
-              <Link to="/signup" className="block py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-center">
-                Sign Up
-              </Link>
+              {user ? (
+                <>
+                  <div className="py-2 text-gray-700 font-medium">
+                    {user.user_metadata?.name || user.email}
+                  </div>
+                  <button
+                    onClick={handleSignOut}
+                    className="block w-full py-2 px-4 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-center"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" className="block py-2 text-gray-700 hover:text-gray-900">Login</Link>
+                  <Link to="/signup" className="block py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-center">
+                    Sign Up
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         )}
